@@ -36,25 +36,43 @@ const generateFile = file => {
     let messagesHash = {};
     // 替换template中的部分
     content = content.replace(/<template(.|\n)*template>/gim, match => {
-        return match.replace(/(\w+='|\w+="|<|>|'|")([^'"<>]*[\u4e00-\u9fa5]+[^'"<>]*)(['"<>])/gim, (_, prev, match, after) => {
+        return match.replace(/(\w+='|\w+="|>|'|")([^'"<>]*[\u4e00-\u9fa5]+[^'"<>]*)(['"<])/gim, (_, prev, match, after) => {
             match = match.trim();
-            let currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+            let result = '';
+            let currentKey;
+            if (match.match(/{{[^{}]+}}/)) {
+                let matchIndex = 0;
+                let matchArr = [];
+                match = match.replace(/{{([^{}]+)}}/gim, (_, match) => {
+                    matchArr.push(match);
+                    return `{${matchIndex++}}`;
+                });
+                currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+                if (!matchArr.length) {
+                    result = `${prev}{{$t('${currentKey}')}}${after}`;
+                } else {
+                    result = `${prev}{{$t('${currentKey}', [${matchArr.toString()}])}}${after}`;
+                }
+            } else {
+                currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+                if (prev.match(/^\w+='$/)) {
+                    result = `:${prev}$t("${currentKey}")${after}`;
+                } else if (prev.match(/^\w+="$/)) {
+                    result = `:${prev}$t('${currentKey}')${after}`;
+                } else if (prev === '"' || prev === '\'') {
+                    result = `$t(${prev}${currentKey}${after})`;
+                } else {
+                    result = `${prev}{{$t('${currentKey}')}}${after}`;
+                }
+            }
             messages[currentKey] = match;
             messagesHash[match] = currentKey;
-            if (prev.match(/^\w+='$/)) {
-                return `:${prev}$t("${currentKey}")${after}`;
-            } else if (prev.match(/^\w+="$/)) {
-                return `:${prev}$t('${currentKey}')${after}`;
-            } else if (prev === '"' || prev === '\'') {
-                return `$t(${prev}${currentKey}${after})`;
-            } else {
-                return `${prev}{{$t('${currentKey}')}}${after}`;
-            }
+            return result;
         });
     });
     // 替换script中的部分
     content = content.replace(/<script(.|\n)*script>/gim, match => {
-        return match.replace(/(['"`])([^'"`]*[\u4e00-\u9fa5]+[^'"`]*)(['"`])/gim, (_, prev, match, after) => {
+        return match.replace(/(['"`])([^'"`\n]*[\u4e00-\u9fa5]+[^'"`\n]*)(['"`])/gim, (_, prev, match, after) => {
             match = match.trim();
             let currentKey;
             let result = '';
