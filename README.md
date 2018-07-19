@@ -36,3 +36,6 @@ new Vue({
 -   本工具只替换vue文件的中文部分，包括template和script中的中文内容
 -   vue文件中的props中的各个属性的default中不要使用中文，否则替换后无法正常使用
 -   对于需要做字符串连接的部分，不要使用 + 号，使用 \`\`符号进行连接，这样在生成的时候会自动将 ${} 部分作为参数传入
+
+### 参考
+[vue-i18n 文档](https://kazupon.github.io/vue-i18n/)

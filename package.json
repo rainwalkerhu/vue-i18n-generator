@@ -1,6 +1,6 @@
 {
   "name": "vue-i18n-cli",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "vue-i18n util",
   "main": "index.js",
   "bin": {
