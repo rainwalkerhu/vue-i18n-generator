@@ -1,5 +1,5 @@
 {
-  "name": "vue-i18n-generator",
+  "name": "vue-i18n-cli",
   "version": "1.0.0",
   "description": "vue-i18n util",
   "main": "index.js",
