@@ -2,7 +2,8 @@
 ##  通过该工具，可以将未加入vue-i18n的vue项目自动提取项目vue文件中的中文部分生成国际化配置文件并自动替换对应位置
 ### 安装
 ```
-sudo npm install -g vue-i18n-generator
+sudo npm install -g vue-i18n-cli
+sudo yarn global add vue-i18n-cli
 ```
 ### 运行
 

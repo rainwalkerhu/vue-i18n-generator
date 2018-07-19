@@ -1,13 +1,20 @@
 {
   "name": "vue-i18n-cli",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "vue-i18n util",
   "main": "index.js",
   "bin": {
-    "i18n": "bin/cli"
+    "i18n": "./bin/cli.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/thesadboy/vue-i18n-generator.git"
+  },
+  "bugs": {
+    "url": "https://gitee.com/thesadboy/vue-i18n-generator/issues"
   },
   "author": "thesadboy@qq.com",
   "license": "MIT",
