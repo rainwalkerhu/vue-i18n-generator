@@ -16,7 +16,7 @@ const showHelp = () => {
 };
 
 program.version(packageInfo.version, '-v, --version');
-program.command('generate [src]').description('对src目录下的js文件与vue文件进行国际化替换生成').action((src = 'src') => {
+program.command('generate [src]').description('对src目录下的vue文件进行国际化替换生成').action((src = 'src') => {
 	command.generate(src);
 });
 
