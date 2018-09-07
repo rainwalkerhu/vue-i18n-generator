@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 let i18nFile = path.join(process.cwd(), 'zh-cn.js');
 let messages;
+let rootPath;
 /**
  * 初始化国际化的消息对象
  */
@@ -23,6 +24,7 @@ const initMessage = () => {
 const writeMessage = () => {
     fs.writeFileSync(i18nFile, `module.exports = ${JSON.stringify(messages)}`, 'utf8');
 };
+
 /**
  * 替换Vue文件中的需要国际化的部分
  * @param file
@@ -30,7 +32,7 @@ const writeMessage = () => {
 const generateFile = file => {
     let processFile = path.relative(process.cwd(), file);
     console.log(`➤ ${processFile.yellow}`.blue);
-    let key = `${path.dirname(file).replace(/^.*[\\/]/gim, '')}_${path.basename(file).replace(/-/gim, '_').replace(/\..*$/, '')}_`;
+    let key = `${path.relative(rootPath, file).replace(/[\\/\\\\-]/g, '_').replace(/\..*$/, '')}_`;
     let index = 1;
     let content = fs.readFileSync(file, 'utf8');
     let messagesHash = {};
@@ -125,8 +127,8 @@ const getAllFiles = (dir) => {
  * @param src
  */
 module.exports.generate = (src) => {
-    src = path.join(process.cwd(), src);
-    let files = getAllFiles(src);
+    rootPath = path.join(process.cwd(), src);
+    let files = getAllFiles(rootPath);
     initMessage();
     files.forEach(item => {
         generateFile(item);
