@@ -43,6 +43,7 @@ const generateFile = file => {
             let result = '';
             let currentKey;
             if (match.match(/{{[^{}]+}}/)) {
+                //对于 muscache 中部分的替换
                 let matchIndex = 0;
                 let matchArr = [];
                 match = match.replace(/{{([^{}]+)}}/gim, (_, match) => {
@@ -58,12 +59,16 @@ const generateFile = file => {
             } else {
                 currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
                 if (prev.match(/^\w+='$/)) {
+                    //对于属性中普通文本的替换
                     result = `:${prev}$t("${currentKey}")${after}`;
                 } else if (prev.match(/^\w+="$/)) {
+                    //对于属性中普通文本的替换
                     result = `:${prev}$t('${currentKey}')${after}`;
                 } else if (prev === '"' || prev === '\'') {
+                    //对于属性中参数形式中的替换
                     result = `$t(${prev}${currentKey}${after})`;
                 } else {
+                    //对于tag标签中的普通文本替换
                     result = `${prev}{{$t('${currentKey}')}}${after}`;
                 }
             }
@@ -79,9 +84,11 @@ const generateFile = file => {
             let currentKey;
             let result = '';
             if (prev !== '`') {
+                //对于普通字符串的替换
                 currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
                 result = `this.$t('${currentKey}')`;
             } else {
+                //对于 `` 拼接字符串的替换
                 let matchIndex = 0;
                 let matchArr = [];
                 match = match.replace(/(\${)([^{}]+)(})/gim, (_, prev, match) => {
