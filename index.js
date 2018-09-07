@@ -29,7 +29,7 @@ const writeMessage = () => {
  * 替换Vue文件中的需要国际化的部分
  * @param file
  */
-const generateFile = file => {
+const generateVueFile = file => {
     let processFile = path.relative(process.cwd(), file);
     console.log(`➤ ${processFile.yellow}`.blue);
     let key = `${path.relative(rootPath, file).replace(/[\\/\\\\-]/g, '_').replace(/\..*$/, '')}_`;
@@ -110,6 +110,55 @@ const generateFile = file => {
     Object.keys(messagesHash).length && fs.writeFileSync(file, content, 'utf-8');
     console.log(`✔ ${processFile.yellow}`.green);
 };
+
+const generateJsFile = (file) => {
+    let processFile = path.relative(process.cwd(), file);
+    console.log(`➤ ${processFile.yellow}`.blue);
+    let key = `${path.relative(rootPath, file).replace(/[\\/\\\\-]/g, '_').replace(/\..*$/, '')}_`;
+    let index = 1;
+    let content = fs.readFileSync(file, 'utf8');
+    let messagesHash = {};
+    if (!content.match(/(import[\s\t]+Vue[\s\t]+from[\s\t]+'vue'[\s\t]*;?)|((let|var|const)[\s\t]+Vue[\s\t]+\=[\s\t]+require\('vue'\)[\s\t]*;?)/g)) {
+        content = `import Vue from 'vue';\n${content}`;
+    }
+    let imports = content.match(/from[\s\t]+['"][^'"]+['"][\s\t]*;?/gm);
+    let lastImport = imports[imports.length - 1];
+    if (!content.match(/const[\s\t]+\$t[\s\t]+=[\s\t]+_i18n_vue.\$t.bind(_i18n_vue)[\s\t]*;?/)) {
+        content = content.replace(lastImport, $ => {
+            return `${$}\nlet _i18n_vue = new Vue();\nconst $t = _i18n_vue.$t.bind(_i18n_vue);`;
+        });
+    }
+    content = content.replace(/(['"`])([^'"`\n]*[\u4e00-\u9fa5]+[^'"`\n]*)(['"`])/gim, (_, prev, match, after) => {
+        match = match.trim();
+        let currentKey;
+        let result = '';
+        if (prev !== '`') {
+            //对于普通字符串的替换
+            currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+            result = `$t('${currentKey}')`;
+        } else {
+            //对于 `` 拼接字符串的替换
+            let matchIndex = 0;
+            let matchArr = [];
+            match = match.replace(/(\${)([^{}]+)(})/gim, (_, prev, match) => {
+                matchArr.push(match);
+                return `{${matchIndex++}}`;
+            });
+            currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+            if (!matchArr.length) {
+                result = `$t('${currentKey}')`;
+            } else {
+                result = `$t('${currentKey}', [${matchArr.toString()}])`;
+            }
+        }
+        messages[currentKey] = match;
+        messagesHash[match] = currentKey;
+        return result;
+    });
+    Object.keys(messagesHash).length && fs.writeFileSync(file, content, 'utf-8');
+    console.log(`✔ ${processFile.yellow}`.green);
+};
+
 /**
  * 获取所有满足需求的文件
  * @param dir
@@ -122,7 +171,7 @@ const getAllFiles = (dir) => {
         if (fs.lstatSync(item).isDirectory()) {
             results.push(...getAllFiles(item));
         } else {
-            if (path.extname(item).toLowerCase() === '.vue') {
+            if (['.vue', '.js'].indexOf(path.extname(item).toLowerCase()) > -1) {
                 results.push(item);
             }
         }
@@ -138,7 +187,7 @@ module.exports.generate = (src) => {
     let files = getAllFiles(rootPath);
     initMessage();
     files.forEach(item => {
-        generateFile(item);
+        path.extname(item).toLowerCase() === '.vue' ? generateVueFile(item) : generateJsFile(item);
     });
     writeMessage();
 };
