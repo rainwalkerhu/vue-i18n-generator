@@ -119,15 +119,21 @@ const generateJsFile = (file) => {
     let content = fs.readFileSync(file, 'utf8');
     let messagesHash = {};
     //判断是否已经引入了 Vue， 若没有引入，则在文件头部引入
-    if (!content.match(/(import.+from[\s\t]+'vue'[\s\t]*;?)|((let|var|const).+\=[\s\t]+require\('vue'\)[\s\t]*;?)/g)) {
+    let vueMatch = content.match(/(import[\s\t]+([^\s\t]+)[\s\t]+from[\s\t]+'vue'[\s\t]*;?)|((let|var|const)[\s\t]+([^\s\t]+)[\s\t]+\=[\s\t]+require\('vue'\)[\s\t]*;?)/g);
+    let vueModule = 'Vue';
+    if (!vueMatch) {
         content = `import Vue from 'vue';\n${content}`;
+    } else {
+        vueMatch[0].replace(/^[^\s\t]+[\s\t]+([^\s\t]+)/g, (match, $1) => {
+            vueModule = $1;
+        });
     }
     let imports = content.match(/from[\s\t]+['"][^'"]+['"][\s\t]*;?/gm);
     let lastImport = imports[imports.length - 1];
     //判断是否已经做过绑定 $t 的绑定，若没有，则自动绑定 $t
     if (!content.match(/const[\s\t]+\$t[\s\t]+=[\s\t]+_i18n_vue.\$t.bind(_i18n_vue)[\s\t]*;?/)) {
         content = content.replace(lastImport, $ => {
-            return `${$}\nlet _i18n_vue = new Vue();\nconst $t = _i18n_vue.$t.bind(_i18n_vue);`;
+            return `${$}\nlet _i18n_vue = new ${vueModule}();\nconst $t = _i18n_vue.$t.bind(_i18n_vue);`;
         });
     }
     content = content.replace(/(['"`])([^'"`\n]*[\u4e00-\u9fa5]+[^'"`\n]*)(['"`])/gim, (_, prev, match, after) => {
