@@ -119,14 +119,12 @@ const generateJsFile = (file) => {
     let content = fs.readFileSync(file, 'utf8');
     let messagesHash = {};
     //判断是否已经引入了 Vue， 若没有引入，则在文件头部引入
-    let vueMatch = content.match(/(import[\s\t]+([^\s\t]+)[\s\t]+from[\s\t]+'vue'[\s\t]*;?)|((let|var|const)[\s\t]+([^\s\t]+)[\s\t]+\=[\s\t]+require\('vue'\)[\s\t]*;?)/g);
+    let vueMatch = content.match(/(import[\s\t]+([^\s\t]+)[\s\t]+from[\s\t]+'vue'[\s\t]*;?)|((let|var|const)[\s\t]+([^\s\t]+)[\s\t]+\=[\s\t]+require\('vue'\)[\s\t]*;?)/m);
     let vueModule = 'Vue';
     if (!vueMatch) {
         content = `import Vue from 'vue';\n${content}`;
     } else {
-        vueMatch[0].replace(/^[^\s\t]+[\s\t]+([^\s\t]+)/g, (match, $1) => {
-            vueModule = $1;
-        });
+        vueModule = vueMatch[2] || vueMatch[5];
     }
     let imports = content.match(/from[\s\t]+['"][^'"]+['"][\s\t]*;?/gm);
     let lastImport = imports[imports.length - 1];
