@@ -7,6 +7,7 @@ let config = {
     single: false
 };
 let index = 1;
+let messagesHash = {};
 let messages;
 let rootPath;
 /**
@@ -35,8 +36,16 @@ const getPreKey = (file) => {
 };
 
 const resetIndex = () => {
+    //对于支持单文件index情况，恢复初始index
     if (config.single && !config.key) {
         index = 1;
+    }
+};
+
+const resetMessageHash = () => {
+    //针对没有设置key的情况，恢复每次文件的messageHash
+    if (!config.key) {
+        messagesHash = {};
     }
 };
 
@@ -47,10 +56,11 @@ const resetIndex = () => {
 const generateVueFile = file => {
     let processFile = path.relative(process.cwd(), file);
     console.log(`➤ ${processFile.yellow}`.blue);
-    let key = getPreKey(file);
     resetIndex();
+    resetMessageHash();
+    let key = getPreKey(file);
+    let hasReplaced = false;
     let content = fs.readFileSync(file, 'utf8');
-    let messagesHash = {};
     // 替换template中的部分
     content = content.replace(/<template(.|\n)*template>/gim, match => {
         return match.replace(/(\w+='|\w+="|>|'|")([^'"<>]*[\u4e00-\u9fa5]+[^'"<>]*)(['"<])/gim, (_, prev, match, after) => {
@@ -89,6 +99,7 @@ const generateVueFile = file => {
             }
             messages[currentKey] = match;
             messagesHash[match] = currentKey;
+            hasReplaced = true;
             return result;
         });
     });
@@ -119,20 +130,22 @@ const generateVueFile = file => {
             }
             messages[currentKey] = match;
             messagesHash[match] = currentKey;
+            hasReplaced = true;
             return result;
         });
     });
-    Object.keys(messagesHash).length && fs.writeFileSync(file, content, 'utf-8');
+    hasReplaced && fs.writeFileSync(file, content, 'utf-8');
     console.log(`✔ ${processFile.yellow}`.green);
 };
 
 const generateJsFile = (file) => {
     let processFile = path.relative(process.cwd(), file);
     console.log(`➤ ${processFile.yellow}`.blue);
-    let key = getPreKey(file);
     resetIndex();
+    resetMessageHash();
+    let key = getPreKey(file);
+    let hasReplaced = false;
     let content = fs.readFileSync(file, 'utf8');
-    let messagesHash = {};
     //判断是否已经引入了 Vue， 若没有引入，则在文件头部引入
     let vueMatch = content.match(/(import[\s\t]+([^\s\t]+)[\s\t]+from[\s\t]+'vue'[\s\t]*;?)|((let|var|const)[\s\t]+([^\s\t]+)[\s\t]+\=[\s\t]+require\('vue'\)[\s\t]*;?)/m);
     let vueModule = 'Vue';
@@ -174,9 +187,10 @@ const generateJsFile = (file) => {
         }
         messages[currentKey] = match;
         messagesHash[match] = currentKey;
+        hasReplaced = true;
         return result;
     });
-    Object.keys(messagesHash).length && fs.writeFileSync(file, content, 'utf-8');
+    hasReplaced && fs.writeFileSync(file, content, 'utf-8');
     console.log(`✔ ${processFile.yellow}`.green);
 };
 
