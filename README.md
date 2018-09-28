@@ -15,7 +15,7 @@ i18n generate ./src
 
 执行时，可以通过参数控制key和index，如下
 ```
--k, --key [key]  自定义key前缀，默认为相对执行目录的文件路径
+-k, --key <key>  自定义key前缀，默认为相对执行目录的文件路径
 -s, --single     是否为单文件index序列，默认为全局序列，当自定义key之后，此设置无效
 ```
 ```javascript
