@@ -1,11 +1,11 @@
 {
   "name": "vue-i18n-cli",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "vue-i18n util",
   "keywords": ["vue","i18n","工具"],
   "main": "index.js",
   "bin": {
-    "i18n": "./bin/cli.js"
+    "i18n": "bin/i18n.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

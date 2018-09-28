@@ -2,6 +2,11 @@ require('colors');
 const path = require('path');
 const fs = require('fs');
 let i18nFile = path.join(process.cwd(), 'zh-cn.js');
+let config = {
+    key: '',
+    single: false
+};
+let index = 1;
 let messages;
 let rootPath;
 /**
@@ -25,6 +30,16 @@ const writeMessage = () => {
     fs.writeFileSync(i18nFile, `module.exports = ${JSON.stringify(messages)}`, 'utf8');
 };
 
+const getPreKey = (file) => {
+    return config.key ? `${config.key}_` : `${path.relative(rootPath, file).replace(/[\\/\\\\-]/g, '_').replace(/\..*$/, '')}_`;
+};
+
+const resetIndex = () => {
+    if (config.single && !config.key) {
+        index = 1;
+    }
+};
+
 /**
  * 替换Vue文件中的需要国际化的部分
  * @param file
@@ -32,8 +47,8 @@ const writeMessage = () => {
 const generateVueFile = file => {
     let processFile = path.relative(process.cwd(), file);
     console.log(`➤ ${processFile.yellow}`.blue);
-    let key = `${path.relative(rootPath, file).replace(/[\\/\\\\-]/g, '_').replace(/\..*$/, '')}_`;
-    let index = 1;
+    let key = getPreKey(file);
+    resetIndex();
     let content = fs.readFileSync(file, 'utf8');
     let messagesHash = {};
     // 替换template中的部分
@@ -114,8 +129,8 @@ const generateVueFile = file => {
 const generateJsFile = (file) => {
     let processFile = path.relative(process.cwd(), file);
     console.log(`➤ ${processFile.yellow}`.blue);
-    let key = `${path.relative(rootPath, file).replace(/[\\/\\\\-]/g, '_').replace(/\..*$/, '')}_`;
-    let index = 1;
+    let key = getPreKey(file);
+    resetIndex();
     let content = fs.readFileSync(file, 'utf8');
     let messagesHash = {};
     //判断是否已经引入了 Vue， 若没有引入，则在文件头部引入
@@ -188,7 +203,8 @@ const getAllFiles = (dir) => {
  * 入口
  * @param src
  */
-module.exports.generate = (src) => {
+module.exports.generate = (src, options) => {
+    config = Object.assign(config, options);
     rootPath = path.join(process.cwd(), src);
     let files = getAllFiles(rootPath);
     initMessage();

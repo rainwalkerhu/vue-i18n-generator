@@ -13,6 +13,11 @@ i18n generate ./src
 ```
 然后就会在根目录生成一个 zh-cn.js 的配置文件，之后对项目引入vue-i18n并采用该配置文件即可
 
+执行时，可以通过参数控制key和index，如下
+```
+-k, --key [key]  自定义key前缀，默认为相对执行目录的文件路径
+-s, --single     是否为单文件index序列，默认为全局序列，当自定义key之后，此设置无效
+```
 ```javascript
 import VueI18n from 'vue-i18n';
 
