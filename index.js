@@ -216,6 +216,7 @@ const getAllFiles = (dir) => {
 /**
  * 入口
  * @param src
+ * @param options
  */
 module.exports.generate = (src, options) => {
     config = Object.assign(config, options);
