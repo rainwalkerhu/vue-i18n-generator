@@ -31,8 +31,24 @@ const writeMessage = () => {
     fs.writeFileSync(i18nFile, `module.exports = ${JSON.stringify(messages)}`, 'utf8');
 };
 
+/**
+ * 获取key前缀
+ * @param file
+ * @returns {string}
+ */
 const getPreKey = (file) => {
-    return config.key ? `${config.key}_` : `${path.relative(rootPath, file).replace(/[\\/\\\\-]/g, '_').replace(/\..*$/, '')}_`;
+    return config.key ? `${config.key.replace(/[-_]+$/, '')}_` : `${path.relative(rootPath, file).replace(/[\\/\\\\-]/g, '_').replace(/\..*$/, '')}_`;
+};
+
+/**
+ * 获取当前key
+ * @returns {*}
+ */
+const getCurrentKey = (match, file) => {
+    if (messagesHash[match]) return messagesHash[match];
+    let key = getPreKey(file) + (index++);
+    if (!messages[key]) return key.toLowerCase();
+    return getCurrentKey(match, file);
 };
 
 const resetIndex = () => {
@@ -75,14 +91,14 @@ const generateVueFile = file => {
                     matchArr.push(match);
                     return `{${matchIndex++}}`;
                 });
-                currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+                currentKey = getCurrentKey(match, file);
                 if (!matchArr.length) {
                     result = `${prev}{{$t('${currentKey}')}}${after}`;
                 } else {
                     result = `${prev}{{$t('${currentKey}', [${matchArr.toString()}])}}${after}`;
                 }
             } else {
-                currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+                currentKey = getCurrentKey(match, file);
                 if (prev.match(/^\w+='$/)) {
                     //对于属性中普通文本的替换
                     result = `:${prev}$t("${currentKey}")${after}`;
@@ -111,7 +127,7 @@ const generateVueFile = file => {
             let result = '';
             if (prev !== '`') {
                 //对于普通字符串的替换
-                currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+                currentKey = getCurrentKey(match, file);
                 result = `this.$t('${currentKey}')`;
             } else {
                 //对于 `` 拼接字符串的替换
@@ -121,7 +137,7 @@ const generateVueFile = file => {
                     matchArr.push(match);
                     return `{${matchIndex++}}`;
                 });
-                currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+                currentKey = getCurrentKey(match, file);
                 if (!matchArr.length) {
                     result = `this.$t('${currentKey}')`;
                 } else {
@@ -168,7 +184,7 @@ const generateJsFile = (file) => {
         let result = '';
         if (prev !== '`') {
             //对于普通字符串的替换
-            currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+            currentKey = getCurrentKey(match, file);
             result = `$t('${currentKey}')`;
         } else {
             //对于 `` 拼接字符串的替换
@@ -178,7 +194,7 @@ const generateJsFile = (file) => {
                 matchArr.push(match);
                 return `{${matchIndex++}}`;
             });
-            currentKey = (messagesHash[match] || key + (index++)).toLowerCase();
+            currentKey = getCurrentKey(match, file);
             if (!matchArr.length) {
                 result = `$t('${currentKey}')`;
             } else {
