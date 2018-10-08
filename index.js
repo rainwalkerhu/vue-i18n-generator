@@ -1,7 +1,7 @@
 require('colors');
 const path = require('path');
 const fs = require('fs');
-let i18nFile = path.join(process.cwd(), 'zh-cn.js');
+let i18nFile;
 let config = {
     key: '',
     single: false
@@ -235,6 +235,7 @@ const getAllFiles = (dir) => {
 module.exports.generate = (src, options) => {
     config = Object.assign(config, options);
     rootPath = path.join(process.cwd(), src);
+    i18nFile = path.join(process.cwd(), options.path ? options.path : '', `${options.filename ? options.filename : 'zh_cn'}.js`);
     let files = getAllFiles(rootPath);
     initMessage();
     files.forEach(item => {

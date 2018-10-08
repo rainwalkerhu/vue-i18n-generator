@@ -15,8 +15,10 @@ i18n generate ./src
 
 执行时，可以通过参数控制key和index，如下
 ```
--k, --key <key>  自定义key前缀，默认为相对执行目录的文件路径
--s, --single     是否为单文件index序列，默认为全局序列，当自定义key之后，此设置无效
+-k, --key <key>            自定义key前缀，默认为相对执行目录的文件路径
+-s, --single               是否为单文件index序列，默认为全局序列，当自定义key之后，此设置无效
+-p, --path <path>          设置生成文件的路径，默认为运行目录（请设置已经存在的目录！！！）
+-f, --filename <filename>  设置生成文件名，默认为zh_cn
 ```
 ```javascript
 import VueI18n from 'vue-i18n';

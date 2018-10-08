@@ -9,8 +9,10 @@ program.command('generate [src]')
     .description('对src目录下的vue文件进行国际化替换生成, 默认src为执行目录下的src目录')
     .option('-k, --key <key>', '自定义key前缀，默认为相对执行目录的文件路径')
     .option('-s, --single', '是否为单文件index序列，默认为全局序列，当自定义key之后，此设置无效')
-    .action((src = 'src', {key, single}) => {
-        let options = {key, single};
+    .option('-p, --path <path>', '设置生成文件的路径，默认为运行目录（请设置已经存在的目录！！！）')
+    .option('-f, --filename <filename>', '设置生成文件名，默认为zh_cn')
+    .action((src = 'src', {key, single, path, filename}) => {
+        let options = {key, single, path, filename};
         commandFile.generate(src, options);
     });
 program.on('command:*', function () {
