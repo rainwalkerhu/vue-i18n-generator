@@ -74,7 +74,6 @@ const generateVueFile = file => {
     console.log(`➤ ${processFile.yellow}`.blue);
     resetIndex();
     resetMessageHash();
-    let key = getPreKey(file);
     let hasReplaced = false;
     let content = fs.readFileSync(file, 'utf8');
     // 替换template中的部分
@@ -159,7 +158,6 @@ const generateJsFile = (file) => {
     console.log(`➤ ${processFile.yellow}`.blue);
     resetIndex();
     resetMessageHash();
-    let key = getPreKey(file);
     let hasReplaced = false;
     let content = fs.readFileSync(file, 'utf8');
     //判断是否已经引入了 Vue， 若没有引入，则在文件头部引入
