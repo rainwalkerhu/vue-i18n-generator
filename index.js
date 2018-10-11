@@ -17,6 +17,9 @@ const initMessage = () => {
     if (fs.existsSync(i18nFile)) {
         try {
             messages = require(i18nFile);
+            Object.keys(messages).forEach(key => {
+                messagesHash[messages[key]] = key;
+            });
         } catch (e) {
         }
     }
@@ -239,7 +242,9 @@ module.exports.generate = (src, options) => {
     let files = getAllFiles(rootPath);
     initMessage();
     files.forEach(item => {
-        path.extname(item).toLowerCase() === '.vue' ? generateVueFile(item) : generateJsFile(item);
+        if (item !== i18nFile) {
+            path.extname(item).toLowerCase() === '.vue' ? generateVueFile(item) : generateJsFile(item);
+        }
     });
     writeMessage();
 };
